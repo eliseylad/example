@@ -47,6 +47,10 @@ def process_mockup(object_img_bin, texture_img_bin):
     is_success, buffer = cv2.imencode(".png", result)
     return io.BytesIO(buffer)
 
+@app.route('/')
+def health_check():
+    return "Сервер работает! Используй POST /api/generate для создания мокапов."
+
 @app.route('/api/generate', methods=['POST'])
 def generate():
     # Проверяем наличие обоих файлов в запросе
