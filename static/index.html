@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Mockup Generator</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding: 50px; background: #f4f4f9; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 400px; }
+        input { margin-bottom: 20px; width: 100%; }
+        button { width: 100%; padding: 10px; background: #0070f3; color: white; border: none; border-radius: 6px; cursor: pointer; }
+        button:disabled { background: #ccc; }
+        #result { margin-top: 20px; display: none; text-align: center; }
+        #result img { max-width: 100%; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h2>Генератор мокапов</h2>
+        <label>1. Шаблон (booster.png):</label>
+        <input type="file" id="objInput" accept="image/png">
+        
+        <label>2. Текстура (дизайн):</label>
+        <input type="file" id="texInput" accept="image/*">
+        
+        <button id="btn">Создать мокап</button>
+
+        <div id="result">
+            <p>Готово!</p>
+            <img id="resImg" src="" alt="Результат">
+            <br><br>
+            <a id="downloadBtn" href="" download="mockup.png">Скачать результат</a>
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('btn');
+        btn.onclick = async () => {
+            const obj = document.getElementById('objInput').files[0];
+            const tex = document.getElementById('texInput').files[0];
+
+            if (!obj || !tex) return alert('Выберите оба файла!');
+
+            btn.disabled = true;
+            btn.innerText = 'Обработка...';
+
+            const formData = new FormData();
+            formData.append('object', obj);
+            formData.append('texture', tex);
+
+            try {
+                const response = await fetch('/api/generate', { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Ошибка сервера');
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                
+                document.getElementById('resImg').src = url;
+                document.getElementById('downloadBtn').href = url;
+                document.getElementById('result').style.display = 'block';
+            } catch (e) {
+                alert(e.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Создать мокап';
+            }
+        };
+    </script>
+</body>
+</html>
